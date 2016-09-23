@@ -10,33 +10,42 @@ import android.database.sqlite.SQLiteOpenHelper;
  * Created by Administrator on 2016/9/19.
  */
 public class DatabaseHandler extends SQLiteOpenHelper{
+    private static final String SQL_CREATE_ENTRIES =
+            "CREATE TABLE " + FeedReaderContract.FeedEntry.TABLE_NAME +
+                    "( "+ FeedReaderContract.FeedEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "+
+                    FeedReaderContract.FeedEntry.COLUMN_NAME_NAME+" TEXT, "+
+                    FeedReaderContract.FeedEntry.COLUMN_NAME_AGE +" INTEGER)";
+    private static final String SQL_DELETE_ENTRIES =
+            "DROP TABLE "+ FeedReaderContract.FeedEntry.TABLE_NAME +" IF EXISTS";
+
     public DatabaseHandler(Context context, String name, SQLiteDatabase.CursorFactory factory, int version) {
         super(context, name, factory, version);
     }
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL("create table students( id integer primary key autoincrement, name txt, age integer)");
+        db.execSQL(SQL_CREATE_ENTRIES);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        db.execSQL("drop table students if exists");
+        db.execSQL(SQL_DELETE_ENTRIES);
         onCreate(db);
     }
 
     public void insertStudent(Student student) {
         //use ContentValues object to store the data
         ContentValues values = new ContentValues();
-        values.put("name", student.getmName());
-        values.put("age", student.getmAge());
+        values.put(FeedReaderContract.FeedEntry.COLUMN_NAME_NAME, student.getmName());
+        values.put(FeedReaderContract.FeedEntry.COLUMN_NAME_AGE, student.getmAge());
         //add the values into the database
-        this.getWritableDatabase().insert("students", null, values);
+        this.getWritableDatabase().insert(FeedReaderContract.FeedEntry.TABLE_NAME, null, values);
     }
 
     public String getStudents() {
         //use cursor to load the data
-        Cursor cursor = (Cursor) this.getReadableDatabase().rawQuery("select * from students", null);
+        String sql = "SELECT * FROM " + FeedReaderContract.FeedEntry.TABLE_NAME;
+        Cursor cursor = (Cursor) this.getReadableDatabase().rawQuery(sql, null);
         String result = "";
         //get the data in the database row by row via the cursor
         while (cursor.moveToNext()) {
