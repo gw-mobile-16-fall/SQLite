@@ -2,5 +2,5 @@
     <string name="app_name">SQLite Demo</string>
     <string name="age">AGE:</string>
     <string name="name">NAME:</string>
-    <string name="sign_in">SIGN IN</string>
+    <string name="submit">SUBMIT</string>
 </resources>
