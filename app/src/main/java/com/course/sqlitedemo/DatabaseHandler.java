@@ -6,10 +6,16 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Created by Administrator on 2016/9/19.
  */
 public class DatabaseHandler extends SQLiteOpenHelper{
+    private static DatabaseHandler instance;
+    private static final String DATABASE_NAME = "test";
+    private static final int DATABASE_VERSION = 1;
     private static final String SQL_CREATE_ENTRIES =
             "CREATE TABLE " + FeedReaderContract.FeedEntry.TABLE_NAME +
                     "( "+ FeedReaderContract.FeedEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "+
@@ -18,8 +24,23 @@ public class DatabaseHandler extends SQLiteOpenHelper{
     private static final String SQL_DELETE_ENTRIES =
             "DROP TABLE "+ FeedReaderContract.FeedEntry.TABLE_NAME +" IF EXISTS";
 
-    public DatabaseHandler(Context context, String name, SQLiteDatabase.CursorFactory factory, int version) {
-        super(context, name, factory, version);
+    //use SINGLETON pattern, in order to prevent from creating multiple class
+    public static synchronized DatabaseHandler getInstance(Context context) {
+        if (instance == null) {
+            instance = new DatabaseHandler(context.getApplicationContext());
+        }
+        return instance;
+    }
+
+    //set the constructor to private
+    private DatabaseHandler(Context context) {
+        /*
+            context	(Context): to use to open or create the database
+            name	(String): of the database file, or null for an in-memory database
+            factory	(SQLiteDatabase.CursorFactory): to use for creating cursor objects, or null for the default
+            version	(int): number of the database (starting at 1);
+        */
+        super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
     @Override
@@ -29,6 +50,7 @@ public class DatabaseHandler extends SQLiteOpenHelper{
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        //if version updated, drop the original database and create a new one
         db.execSQL(SQL_DELETE_ENTRIES);
         onCreate(db);
     }
@@ -42,18 +64,23 @@ public class DatabaseHandler extends SQLiteOpenHelper{
         this.getWritableDatabase().insert(FeedReaderContract.FeedEntry.TABLE_NAME, null, values);
     }
 
-    public String getStudents() {
-        //use cursor to load the data
+    public List<Student> getStudents() {
         String sql = "SELECT * FROM " + FeedReaderContract.FeedEntry.TABLE_NAME;
+        //use cursor to load the data
         Cursor cursor = (Cursor) this.getReadableDatabase().rawQuery(sql, null);
-        String result = "";
+        List<Student> students = new ArrayList<Student>();
         //get the data in the database row by row via the cursor
         while (cursor.moveToNext()) {
-            result += ("\n" + "ID: " + cursor.getInt(0) + "    NAME: " + cursor.getString(1) + "    AGE: " + cursor.getInt(2));
+            Student student = new Student(cursor.getInt(0), cursor.getString(1), cursor.getInt(2));
+            students.add(student);
         }
-        //if no data in the database, set a default message into the return value
-        if (result.length() == 0)
-            result = "No data in the database.";
-        return result;
+        return students;
+    }
+
+    public void deleteStudent(int id) {
+        String whereClause = FeedReaderContract.FeedEntry._ID + " = ?";
+        String[] whereArgs = {id+""};
+        //delete the data by id
+        this.getWritableDatabase().delete(FeedReaderContract.FeedEntry.TABLE_NAME, whereClause, whereArgs);
     }
 }

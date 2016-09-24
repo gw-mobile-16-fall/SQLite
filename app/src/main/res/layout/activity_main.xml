@@ -41,10 +41,9 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:text="@string/submit"
-        android:onClick="addStudent"/>
-    <TextView
-        android:layout_width="wrap_content"
+        android:onClick="submit"/>
+    <ListView
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/result"
-        android:text="Hello World!" />
+        android:id="@+id/students_list_view" />
 </LinearLayout>

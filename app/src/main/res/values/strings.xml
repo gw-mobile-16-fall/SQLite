@@ -3,4 +3,5 @@
     <string name="age">AGE:</string>
     <string name="name">NAME:</string>
     <string name="submit">SUBMIT</string>
+    <string name="cross">×</string>
 </resources>
